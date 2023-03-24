@@ -51,7 +51,7 @@
 直接在Idea中执行main函数，可以调整myProjects为你喜欢的项目，也可以调整GetAllDataOfProjectByDateFusion的第一个参数util.GetLatestWeekDayList(time.Sunday, 6)
 为你要去的星期，我们是星期日去，所以这个用的星期日.util.GetLatestWeekDayList(time.Sunday, 6)第二个参数为取最近几个同星期的数据做融合均值，我取了最近6个周日的数据来做平均
 当然建议不要取太多这个网站获取数据的速度一言难进。
-这个函数前面是过滤数据用的func(m map[string][]*model.WaitTimeData) {
+这个函数签名参数是过滤数据用的func(m map[string][]*model.WaitTimeData) {
 business.FilterTimeAfter(19, m)}
 是过滤数据用的,我里面使用的过滤数据为过滤调晚上七点以后的数据，你可以根据你的需要调整
 
