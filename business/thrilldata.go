@@ -129,7 +129,7 @@ func removeElements(slice []*model.WaitTimeData, indices []int) []*model.WaitTim
 	return slice
 }
 
-func descData(resultMap map[string][]*model.WaitTimeData, datelist, projects []string, num int) ([]string, error) {
+func DescSortListData(resultMap map[string][]*model.WaitTimeData, datelist, projects []string, num int) ([]string, error) {
 	needProjects := make(map[string]struct{}, len(projects))
 	for _, project := range projects {
 		needProjects[project] = struct{}{}
@@ -163,9 +163,9 @@ func descData(resultMap map[string][]*model.WaitTimeData, datelist, projects []s
 			realDatas = datas[:num]
 		}
 		// 形成描述
-		var desc string = model.GetProjectName(name) + ": "
+		var desc string = model.GetProjectName(name) + ": \n"
 		for i, data := range realDatas {
-			desc += fmt.Sprintf(" %d. %s : %v ||    ", i+1, data.TimeStr, data.WaitTime)
+			desc += fmt.Sprintf(" %d. %s : %v \n", i+1, data.TimeStr, data.WaitTime)
 		}
 
 		resultDesc = append(resultDesc, desc)
@@ -181,7 +181,7 @@ func GetWaitTimeSortListByProjectName(date string, projects []string, num int,
 		return nil, err
 	}
 
-	return descData(resultMap, []string{date}, projects, num)
+	return DescSortListData(resultMap, []string{date}, projects, num)
 }
 
 func GetWaitTimeSortListByProjectNameFusion(datelist []string, projects []string, num int,
@@ -191,7 +191,7 @@ func GetWaitTimeSortListByProjectNameFusion(datelist []string, projects []string
 		return nil, err
 	}
 
-	return descData(resultMap, datelist, projects, num)
+	return DescSortListData(resultMap, datelist, projects, num)
 }
 
 // 红利为期8：00-9：00，游玩期为 9：10 - 18：00

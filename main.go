@@ -5,6 +5,7 @@ import (
 	"LittleBeeMark/disneyland/model"
 	"LittleBeeMark/disneyland/util"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -57,18 +58,58 @@ var myProjects = []string{
 }
 
 func main() {
+	stopChan := make(chan struct{}, 1)
+	group := sync.WaitGroup{}
+	group.Add(1)
+	go func() {
+		defer group.Done()
+		for {
+			select {
+			case <-stopChan:
+				return
+			default:
+				fmt.Println("迪士尼项目策略生成中，有点慢，请稍等片刻。。。。")
+				time.Sleep(time.Second * 3)
+			}
+		}
+	}()
 
-	got, err := business.GetAllDataOfProjectByDateFusion(util.GetLatestWeekDayList(time.Sunday, 6),
-		func(m map[string][]*model.WaitTimeData) {
-			business.FilterTimeAfter(19, m)
-		})
-	if err != nil {
-		fmt.Println("err : ", err)
-		return
-	}
+	group.Add(1)
+	go func() {
+		defer group.Done()
+		dateList := util.GetLatestWeekDayList(time.Sunday, 6)
+		got, err := business.GetAllDataOfProjectByDateFusion(dateList,
+			func(m map[string][]*model.WaitTimeData) {
+				business.FilterTimeAfter(19, m)
+			})
+		if err != nil {
+			fmt.Println("GetAllDataOfProjectByDateFusion err : ", err)
+			return
+		}
 
-	sts := business.GenerateStrategy(got, myProjects)
-	for i, st := range sts {
-		fmt.Println(st.Desc(i))
-	}
+		sts := business.GenerateStrategy(got, myProjects)
+		fmt.Println("========================= 迪士尼策略优先级排行榜 =========================")
+		for i, st := range sts {
+			fmt.Println(st.Desc(i))
+		}
+
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println("========================= 单个项目不同时间点等待时间排名 =========================")
+		sortListGot, err := business.DescSortListData(got, dateList, myProjects, 50)
+		if err != nil {
+			fmt.Println("DescSortListData err : ", err)
+			return
+		}
+		for _, data := range sortListGot {
+			fmt.Println(data)
+			fmt.Println()
+		}
+
+		stopChan <- struct{}{}
+	}()
+
+	group.Wait()
+	fmt.Println("迪士尼项目策略生成完毕。。。")
 }
