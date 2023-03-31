@@ -23,6 +23,7 @@ type resJson struct {
 	Title string
 }
 
+// NewThrillData 新建
 func NewThrillData(id string, dateStart, tag, urlTempl string) *ThrillData {
 	return &ThrillData{
 		id,
@@ -32,6 +33,7 @@ func NewThrillData(id string, dateStart, tag, urlTempl string) *ThrillData {
 	}
 }
 
+// NewEvery15Data 15分钟数据
 func NewEvery15Data(date string) *ThrillData {
 	return NewThrillData("54", date, "min", GetWaitTimeUrlTemplate)
 }
@@ -58,6 +60,7 @@ func GetEveryHourWaitTime(date string) (map[string][]*model.WaitTimeData, error)
 	return NewEveryHourData(date).WaitTime()
 }
 
+// WaitTime 获取等待时间
 func (td *ThrillData) WaitTime() (map[string][]*model.WaitTimeData, error) {
 	res, err := util.HttpGet(td.getUrl(), nil)
 	if err != nil {
@@ -69,7 +72,6 @@ func (td *ThrillData) WaitTime() (map[string][]*model.WaitTimeData, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println("plot1:", resultJson.Plot1)
 
 	reg1, err := regexp2.Compile(`(?<=,"y":).+(?=,"ygap":)`, 0)
 	if err != nil {
@@ -79,15 +81,11 @@ func (td *ThrillData) WaitTime() (map[string][]*model.WaitTimeData, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println("match 1: ", match1.String())
 	nameSlice := []string{}
 	err = json.Unmarshal([]byte(match1.String()), &nameSlice)
 	if err != nil {
 		return nil, err
 	}
-	//for _, name := range nameSlice {
-	//	fmt.Println("name slice", name)
-	//}
 
 	reg2, err := regexp2.Compile(`(?<=,"x":).+(?=,"xgap":)`, 0)
 	if err != nil {
@@ -103,8 +101,6 @@ func (td *ThrillData) WaitTime() (map[string][]*model.WaitTimeData, error) {
 		return nil, err
 	}
 
-	//fmt.Println("match 2: ", match2.String())
-
 	var reg3 *regexp2.Regexp
 	if td.Tag == "five" {
 		reg3, err = regexp2.Compile(`(?<="ygap":0,"z":).+(?=,"zmax":)`, 0)
@@ -118,7 +114,6 @@ func (td *ThrillData) WaitTime() (map[string][]*model.WaitTimeData, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println("match 3: ", match3.String())
 
 	waitSlice := [][]interface{}{}
 	err = json.Unmarshal([]byte(match3.String()), &waitSlice)
@@ -148,13 +143,9 @@ func (td *ThrillData) WaitTime() (map[string][]*model.WaitTimeData, error) {
 
 			resData.WaitTime = waitTimeData
 			resMap[name] = append(resMap[name], resData)
-
-			//fmt.Printf("名字： %s,时间 %s 等待：%s \n", name, d, waitTime)
 		}
 	}
 
-	//fmt.Println("match 3: ", match3.String())
-	//fmt.Println("res : ", resultJson.Plot1)
 	return resMap, nil
 }
 
